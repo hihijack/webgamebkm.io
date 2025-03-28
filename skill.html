@@ -12,39 +12,44 @@
         }
 
         #bossContainer {
-            position: relative;
-            width: 300px;
-            margin: 20px auto;
+            margin: 20px auto 50px; /* 增加底部间距 */
         }
 
         #boss {
             font-size: 5em;
-            margin: 20px 0;
-            transform: scale(1);
+            margin: 100px 0;
+            transform: scale(3);
             transition: all 0.3s;
         }
 
         .health-bar {
-            width: 200px;
-            height: 20px;
-            background: #444;
-            border-radius: 10px;
-            margin: 0 auto;
-            overflow: hidden;
+            width: 300px;  /* 新增宽度 */
+            height: 30px;  /* 新增高度 */
+            background: #444;  /* 新增背景色 */
+            border-radius: 15px;  /* 调整圆角 */
+            margin: 20px auto;  /* 居中显示 */
+            overflow: hidden;  /* 隐藏溢出部分 */
+            position: relative; /* 为子元素定位做准备 */
         }
 
         .health-fill {
             height: 100%;
-            background: linear-gradient(45deg, #ff0000 0%, #ff6a00 100%);
             width: 100%;
             transition: width 0.3s ease;
+            position: absolute;  /* 绝对定位填充容器 */
+            left: 0;
+            top: 0;
+        }
+
+        #bossHealth {
+            background: linear-gradient(45deg, #ff0000 0%, #ff6a00 100%) !important;
             box-shadow: 0 0 10px #ff0000;
         }
 
         .word {
             display: inline-block;
-            padding: 12px;
-            margin: 8px;
+            padding: 24px;
+            margin: 10px;
             border: 2px solid #4a5568;
             border-radius: 8px;
             cursor: pointer;
@@ -81,7 +86,7 @@
             right: 20px;
             height: 150px;
             background: rgba(0,0,0,0.8);
-            color: #00ff00;
+            color: #ffffff;
             padding: 10px;
             overflow-y: auto;
             border: 2px solid #00ff00;
@@ -123,7 +128,198 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
-    </style>
+        .spell-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5em;
+            color: #ffeb3b;
+            text-shadow: 0 0 10px #ff5722;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .spell-part {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: partAppear 0.3s ease-out forwards;
+        }
+
+        @keyframes partAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .final-name {
+            display: block;
+            font-size: 3em;
+            color: #ff0000;
+            animation: finalBlast 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        @keyframes finalBlast {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1.5);
+            }
+        }
+        @keyframes finalBang {
+            0% {
+                transform: scale(0) translateY(100%);
+                opacity: 0;
+                text-shadow: 0 0 0 rgba(255,0,0,0.5);
+            }
+            20% {
+                transform: scale(2.5) translateY(0);
+                opacity: 1;
+                text-shadow: 0 0 50px rgba(255,0,0,1);
+                filter: hue-rotate(0deg);
+            }
+            80% {
+                transform: scale(2) translateY(0);
+                opacity: 1;
+                text-shadow: 0 0 50px rgba(255,255,0,1);
+                filter: hue-rotate(0deg);
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                text-shadow: 0 0 50px rgba(255,0,0,0.8);
+                filter: hue-rotate(360deg);
+            }
+        }
+
+.final-bang {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4em;
+    color: #ff0000;
+    animation: finalBang 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    z-index: 999;
+}
+
+/* 添加震动效果 */
+@keyframes shake {
+    0% { transform: scale(3) translate(1px, 1px) rotate(0deg); }
+    10% { transform: scale(3) translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: scale(3) translate(-3px, 0px) rotate(1deg); }
+    30% { transform: scale(3) translate(3px, 2px) rotate(0deg); }
+    40% { transform: scale(3) translate(1px, -1px) rotate(1deg); }
+    50% { transform: scale(3) translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: scale(3) translate(-3px, 1px) rotate(0deg); }
+    70% { transform: scale(3) translate(3px, 1px) rotate(-1deg); }
+    80% { transform: scale(3) translate(-1px, -1px) rotate(1deg); }
+    90% { transform: scale(3) translate(1px, 2px) rotate(0deg); }
+    100% { transform: scale(3) translate(1px, -2px) rotate(-1deg); }
+}
+
+.shake {
+    animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
+}
+/* 新增段落容器样式 */
+.spell-animation {
+    position: fixed;
+    top: 30%; /* 上移给后续段落留空间 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    text-align: center;
+}
+
+.spell-paragraph {
+    position: absolute;
+    width: 100%;
+    opacity: 1;
+    transition: all 0.6s ease;
+    pointer-events: none;
+}
+
+.spell-paragraph.fade-out {
+    opacity: 0 !important;
+    transform: translateY(-20px) scale(0.9);
+}
+
+.spell-paragraph.fade-in {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #ffd700;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes damageBlink {
+    0% { background: #ff0000; }
+    50% { background: #880000; }
+    100% { background: transparent; }
+}
+
+.player-damage {
+    animation: damageBlink 0.3s ease 2;
+}
+
+#playerHealth {
+    background: linear-gradient(45deg, #00ff00 0%, #00cc00 100%) !important;
+    box-shadow: 0 0 10px #00ff00;
+}
+/* 添加飘动动画 */
+@keyframes floatUp {
+    0% {
+        transform: translateY(100%);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-500%);
+        opacity: 0;
+    }
+}
+
+.spell-float-container {
+    position: fixed;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-height: 60vh;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.spell-float-item {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 1.8em;
+    color: #ffd700;
+    text-shadow: 0 0 10px #ff5722;
+    animation: floatUp 6s linear forwards;
+    white-space: nowrap;
+}
+</style>
 </head>
 <body>
     <h1>恶龙血量</h1>
@@ -135,8 +331,23 @@
     </div>
 
     <div id="wordsContainer"></div>
+
+    <div id="loadingOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999; color:white; font-size:2em; justify-content:center; align-items:center; flex-direction:column;">
+        <div class="spinner"></div>
+        <div style="margin-top:20px;">正在聚气...</div>
+    </div>
+
     <button onclick="castSpell()" id="castButton">发动咒语</button>
+
+
+
     <div>攻击次数：<span id="attackCount">0</span>击</div>
+
+    <h1 style="margin-top: 50px;">冒险者血量</h1>
+    <div class="health-bar">
+        <div class="health-fill" id="playerHealth" style="width: 100%; background: linear-gradient(45deg, #00ff00 0%, #00cc00 100%);"></div>
+    </div>
+
 
     <!-- 咒语确认弹窗 -->
     <div id="spellDialog">
@@ -158,11 +369,21 @@
             USER_ID: 'YOUR_USER_ID'
         };
 
+
+        // 添加本地字库配置
+        const LOCAL_WORDS = [
+            "火","水","风","雷","冰","光","暗","龙","斩","杀","破","灭",
+            "炎","爆","咒","盾","御","愈","毒","影","魂","灵","圣","魔",
+            "狂","怒","震","天","地","裂","空","瞬","幻","神","威","吼"
+        ];
+
         let gameState = {
             bossHp: 1000,
+            playerHp: 200, // 新增玩家血量
             attackCount: 0,
             selectedWords: [],
-            isProcessing: false
+            isProcessing: false,
+            isPlayerAlive: true // 新增存活状态
         };
 
         // 元素验证
@@ -228,12 +449,18 @@
             }
 
             static async generateNewWords() {
+                toggleProcessing(true);
                 try {
-                    toggleProcessing(true);
-                    const { words } = await TencentAPI.callAgent("生成文字");
+                    // 从本地字库随机选取12个不重复的文字
+                    const words = [];
+                    const tempWords = [...LOCAL_WORDS];
+                    while(words.length < 12 && tempWords.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * tempWords.length);
+                        words.push(tempWords.splice(randomIndex, 1)[0]);
+                    }
                     renderWords(words);
                 } catch (error) {
-                    showError('生成文字失败，请重试');
+                    showError('生成文字失败: ' + error.message);
                 } finally {
                     toggleProcessing(false);
                 }
@@ -250,7 +477,7 @@
                 return {
                     power: Math.min(999, result.power),
                     desc: result.desc,
-                    words: result.words.replace(/\$\{words\}/g, spellName)
+                    words: result.words + spellName + '!!!'
                 };
             }
         }
@@ -271,11 +498,14 @@
 
         async function castSpell() {
             if (gameState.isProcessing || gameState.selectedWords.length === 0) return;
-            
+    
             try {
                 gameState.isProcessing = true;
+                showLoading(true); // 显示加载状态
+                
                 const { power, desc, words } = await GameController.evaluateSpell();
 
+                showLoading(false);
                 // 显示弹窗
                 showSpellDialog(power, desc, gameState.selectedWords.join(''));
 
@@ -290,20 +520,19 @@
 
                 // 执行攻击
                 executeAttack(power, words);
-                
-                // Boss反击
-                if (gameState.bossHp > 0) {
-                    setTimeout(bossCounterAttack, 1000);
-                }
-
-                // 刷新文字
-                await GameController.generateNewWords();
-
             } catch (error) {
                 showError('咒语发动失败: ' + error.message);
             } finally {
+                showLoading(false); // 隐藏加载状态
                 gameState.isProcessing = false;
             }
+        }
+
+        // 新增加载状态控制函数
+        function showLoading(show) {
+            const loader = document.getElementById('loadingOverlay');
+            loader.style.display = show ? 'flex' : 'none';
+            document.getElementById('castButton').disabled = show;
         }
 
         function showSpellDialog(power, desc, spellName) {
@@ -318,37 +547,105 @@
 
         function executeAttack(power, words) {
             // 显示攻击动画
-            const anim = document.createElement('div');
-            anim.className = 'spell-animation';
-            anim.textContent = words;
-            document.body.appendChild(anim);
-            setTimeout(() => anim.remove(), 1000);
-
-            // 更新状态
-            gameState.attackCount++;
-            gameState.bossHp = Math.max(0, gameState.bossHp - power);
+            // 创建动画容器
+            const animContainer = document.createElement('div');
+            animContainer.className = 'spell-animation';
             
-            // 更新UI
-            document.getElementById('attackCount').textContent = gameState.attackCount;
-            document.getElementById('bossHealth').style.width = `${(gameState.bossHp / 1000) * 100}%`;
+            // 分割咒语文本
+            const parts = words.split(/([，。！])/).filter(p => p);
+            let currentIndex = 0;
             
-            // Boss受击动画
-            const boss = document.getElementById('boss');
-            boss.style.transform = 'scale(1.2)';
-            setTimeout(() => boss.style.transform = 'scale(1)', 300);
+            // 分段显示
+            const showNextPart = () => {
+                if (currentIndex >= parts.length - 1) {
+                    // 移除分段动画
+                    animContainer.remove();
+                    // 创建最终技能名爆点
+                    const finalElement = document.createElement('div');
+                    finalElement.className = 'final-bang';
+                    finalElement.textContent = parts[currentIndex];
+                    
+                    document.body.appendChild(finalElement);
+                    setTimeout(() => {
+                        // 添加震动效果到BOSS
+                        const boss = document.getElementById('boss');
+                        boss.classList.add('shake');
+                        setTimeout(() => boss.classList.remove('shake'), 800);
+                        finalElement.remove()   
+                         // 更新状态
+                        gameState.attackCount++;
+                        gameState.bossHp = Math.max(0, gameState.bossHp - power);
+                        
+                        // 更新UI
+                        document.getElementById('attackCount').textContent = gameState.attackCount;
+                        document.getElementById('bossHealth').style.width = `${(gameState.bossHp / 1000) * 100}%`;
 
-            // 战斗日志
-            logAction(`✨ 发动咒语：${words}（造成${power}点伤害）`);
+                        // 战斗日志
+                        logAction(`✨ 发动咒语：${words}（造成${power}点伤害）`);
 
-            // 胜利判断
-            if (gameState.bossHp === 0) {
-                setTimeout(() => alert(`胜利！${gameState.attackCount}次攻击击败恶龙！`), 500);
-            }
+                        // 胜利判断
+                        if (gameState.bossHp === 0) 
+                        {
+                            setTimeout(() => alert(`胜利！${gameState.attackCount}次攻击击败恶龙！`), 500);
+                        }
+                        else
+                        {
+                             // Boss反击
+                            if (gameState.bossHp > 0) {
+                                setTimeout(bossCounterAttack, 1000);
+                            }
+
+                            // 刷新文字
+                            GameController.generateNewWords();
+                        }                        
+                    }, 1200);
+                    return;
+                }
+
+                // 创建文字片段
+                const partSpan = document.createElement('span');
+                partSpan.className = 'spell-part';
+                partSpan.textContent = parts[currentIndex];
+                animContainer.appendChild(partSpan);
+                
+                // 设置间隔时间
+                const isPunctuation = /[，。！]/.test(parts[currentIndex]);
+                const delay = isPunctuation ? 600 : 300; // 标点停顿更久
+                
+                currentIndex++;
+                setTimeout(showNextPart, delay);
+            };
+
+            // 启动动画
+            document.body.appendChild(animContainer);
+            showNextPart();           
         }
 
         function bossCounterAttack() {
-            const damage = Math.floor(Math.random() * 50) + 30;
-            logAction(`🐉 恶龙反击！造成${damage}点伤害`);
+            // 生成20-50随机伤害
+            const damage = Math.floor(Math.random() * 30) + 20;
+            gameState.playerHp = Math.max(0, gameState.playerHp - damage);
+            
+            // 更新血条
+            document.getElementById('playerHealth').style.width = 
+                `${(gameState.playerHp / 200) * 100}%`;
+            
+            // 增加受击效果
+            document.getElementById('playerHealth').classList.add('player-damage');
+            setTimeout(() => {
+                document.getElementById('playerHealth').classList.remove('player-damage');
+            }, 600);
+            
+            // 死亡判定
+            if(gameState.playerHp <= 0 && gameState.isPlayerAlive) {
+                gameState.isPlayerAlive = false;
+                setTimeout(() => {
+                    alert('战斗失败！你被恶龙击败了！');
+                    location.reload(); // 重新开始游戏
+                }, 500);
+            }
+            
+            logAction(`🐉 恶龙反击！你受到${damage}点伤害（剩余生命：${gameState.playerHp}）`);
         }
 
         function renderWords(words) {

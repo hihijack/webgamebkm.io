@@ -1,668 +1,688 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>完整属性对战游戏</title>
+    <title>咒语屠龙战-完整修复版</title>
     <style>
         body {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 0 20px;
-            font-family: Arial, sans-serif;
-            background: #f0f0f0;
-        }
-        .score-board {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .battle-field {
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .unit-container {
-            width: 45%;
-            padding: 20px;
-            background: #f8f8f8;
-            border-radius: 12px;
-            border: 2px solid #e0e0e0;
-        }
-        .hp-bar {
-            height: 12px;
-            background: #ddd;
-            border-radius: 6px;
-            margin: 8px 0;
-            overflow: hidden;
-        }
-        .hp {
-            height: 100%;
-            background: #4CAF50;
-            transition: width 0.3s ease;
-        }
-        .energy-points {
-            display: flex;
-            gap: 8px;
-            margin: 15px 0;
-        }
-        .energy-point {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            transition: all 0.2s ease;
-        }
-        .energy-point.active {
-            background: #2196F3;
-            box-shadow: 0 2px 4px rgba(33,150,243,0.3);
-        }
-        .energy-point.over {
-            background: #ff5252;
-        }
-        #battle-log {
-            height: 200px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            overflow-y: auto;
-        }
-        .word-buttons {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-        button.char-btn {
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            background: white;
-            color: #333;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 18px;
-            position: relative;
-        }
-        button.char-btn.selected {
-            background: #4CAF50;
+            background: #1a1a1a;
             color: white;
-            border-color: #4CAF50;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
         }
-        button.char-btn:disabled {
+
+        #bossContainer {
+            margin: 20px auto 50px; /* 增加底部间距 */
+        }
+
+        #boss {
+            font-size: 5em;
+            margin: 100px 0;
+            transform: scale(3);
+            transition: all 0.3s;
+        }
+
+        .health-bar {
+            width: 300px;  /* 新增宽度 */
+            height: 30px;  /* 新增高度 */
+            background: #444;  /* 新增背景色 */
+            border-radius: 15px;  /* 调整圆角 */
+            margin: 20px auto;  /* 居中显示 */
+            overflow: hidden;  /* 隐藏溢出部分 */
+            position: relative; /* 为子元素定位做准备 */
+        }
+
+        .health-fill {
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease;
+            position: absolute;  /* 绝对定位填充容器 */
+            left: 0;
+            top: 0;
+        }
+
+        #bossHealth {
+            background: linear-gradient(45deg, #610404 0%, #ff6a00 100%) !important;
+            box-shadow: 0 0 10px #ff0000;
+        }
+
+        .word {
+            display: inline-block;
+            padding: 24px;
+            margin: 10px;
+            border: 2px solid #4a5568;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #2d3748;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .selected {
+            background: #ffd700;
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        #spellDialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+            border: 2px solid gold;
+        }
+
+        #battleLog {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 150px;
+            background: rgba(0,0,0,0.8);
+            color: #ffffff;
+            padding: 10px;
+            overflow-y: auto;
+            border: 2px solid #011b01;
+            border-radius: 8px;
+        }
+
+        .spell-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            color: #ffeb3b;
+            text-shadow: 0 0 10px #ff5722;
+            animation: spellEffect 6s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes spellEffect {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+            5% { opacity: 1; transform: translate(-50%, -50%) scale(2); }
+            90% { opacity: 1; transform: translate(-50%, -50%) scale(2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1.1em;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            transition: opacity 0.3s;
+        }
+
+        button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
-        button.char-btn:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
+        .spell-animation {
+            position: fixed;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 12px;
+            transform: translate(-50%, -50%);
+            font-size: 2.5em;
+            color: #ffeb3b;
+            text-shadow: 0 0 10px #ff5722;
+            text-align: center;
             white-space: nowrap;
-            margin-bottom: 5px;
         }
-        #attack-btn {
-            padding: 12px 24px;
-            background: #FF5722;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-        }
-        #attack-btn:disabled {
-            background: #ffab91;
-            cursor: not-allowed;
-        }
-        @keyframes attack {
-            0% { transform: translateX(0); }
-            30% { transform: translateX(30px); }
-            70% { transform: translateX(-20px); }
-            100% { transform: translateX(0); }
-        }
-        .attack-animation {
-            animation: attack 0.4s;
-        }
-        .type-tag {
+
+        .spell-part {
             display: inline-block;
-            padding: 3px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: partAppear 0.3s ease-out forwards;
         }
-    </style>
+
+        @keyframes partAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .final-name {
+            display: block;
+            font-size: 3em;
+            color: #ff0000;
+            animation: finalBlast 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        @keyframes finalBlast {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1.5);
+            }
+        }
+        @keyframes finalBang {
+            0% {
+                transform: scale(0) translateY(100%);
+                opacity: 0;
+                text-shadow: 0 0 0 rgba(255,0,0,0.5);
+            }
+            20% {
+                transform: scale(2.5) translateY(0);
+                opacity: 1;
+                text-shadow: 0 0 50px rgba(255,0,0,1);
+                filter: hue-rotate(0deg);
+            }
+            80% {
+                transform: scale(2) translateY(0);
+                opacity: 1;
+                text-shadow: 0 0 50px rgba(255,255,0,1);
+                filter: hue-rotate(0deg);
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                text-shadow: 0 0 50px rgba(255,0,0,0.8);
+                filter: hue-rotate(360deg);
+            }
+        }
+
+.final-bang {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4em;
+    color: #a90707;
+    animation: finalBang 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    z-index: 999;
+}
+
+/* 添加震动效果 */
+@keyframes shake {
+    0% { transform: scale(3) translate(1px, 1px) rotate(0deg); }
+    10% { transform: scale(3) translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: scale(3) translate(-3px, 0px) rotate(1deg); }
+    30% { transform: scale(3) translate(3px, 2px) rotate(0deg); }
+    40% { transform: scale(3) translate(1px, -1px) rotate(1deg); }
+    50% { transform: scale(3) translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: scale(3) translate(-3px, 1px) rotate(0deg); }
+    70% { transform: scale(3) translate(3px, 1px) rotate(-1deg); }
+    80% { transform: scale(3) translate(-1px, -1px) rotate(1deg); }
+    90% { transform: scale(3) translate(1px, 2px) rotate(0deg); }
+    100% { transform: scale(3) translate(1px, -2px) rotate(-1deg); }
+}
+
+.shake {
+    animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
+}
+/* 新增段落容器样式 */
+.spell-animation {
+    position: fixed;
+    top: 30%; /* 上移给后续段落留空间 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    text-align: center;
+}
+
+.spell-paragraph {
+    position: absolute;
+    width: 100%;
+    opacity: 1;
+    transition: all 0.6s ease;
+    pointer-events: none;
+}
+
+.spell-paragraph.fade-out {
+    opacity: 0 !important;
+    transform: translateY(-20px) scale(0.9);
+}
+
+.spell-paragraph.fade-in {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #ffd700;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes damageBlink {
+    0% { background: #ff0000; }
+    50% { background: #880000; }
+    100% { background: transparent; }
+}
+
+.player-damage {
+    animation: damageBlink 0.3s ease 2;
+}
+
+#playerHealth {
+    background: linear-gradient(45deg, #038503 0%, #038503 100%) !important;
+    box-shadow: 0 0 10px #00ff00;
+}
+/* 添加飘动动画 */
+@keyframes floatUp {
+    0% {
+        transform: translateY(100%);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-500%);
+        opacity: 0;
+    }
+}
+
+.spell-float-container {
+    position: fixed;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    max-height: 60vh;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.spell-float-item {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 1.8em;
+    color: #ffd700;
+    text-shadow: 0 0 10px #ff5722;
+    animation: floatUp 6s linear forwards;
+    white-space: nowrap;
+}
+</style>
 </head>
 <body>
-    <div class="score-board">得分：<span id="score">0</span></div>
-    
-    <div class="battle-field">
-        <div class="unit-container" id="player-unit">
-            <div>HP: <strong id="player-hp">100</strong></div>
-            <div class="hp-bar"><div id="player-hp-bar" class="hp"></div></div>
-            <div>能量点：</div>
-            <div class="energy-points" id="player-energy"></div>
+    <h1>恶龙</h1>
+    <div id="bossContainer">
+        <div class="health-bar">
+            <div class="health-fill" id="bossHealth" style="width: 100%"></div>
         </div>
-        <div class="unit-container" id="enemy-unit">
-            <div>
-                HP: <strong id="enemy-hp">100</strong>
-                <span id="enemy-type" class="type-tag">普通</span>
-            </div>
-            <div class="hp-bar"><div id="enemy-hp-bar" class="hp"></div></div>
-        </div>
+        <div id="boss">🐉</div>
     </div>
 
-    <div id="battle-log"></div>
-    <div class="word-buttons" id="word-buttons"></div>
-    <button id="attack-btn" onclick="executeSkill()" disabled>发动技能</button>
+    <div id="wordsContainer"></div>
 
-<script>
-const CONFIG = {
-    baseHP: 100,
-    maxEnergy: 10
-};
+    <div id="loadingOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999; color:white; font-size:2em; justify-content:center; align-items:center; flex-direction:column;">
+        <div class="spinner"></div>
+        <div style="margin-top:20px;">正在聚气...</div>
+    </div>
 
-const TYPE_CHART = {
-    // 格式说明：
-    // strong: 本属性克制的属性列表（伤害×1.5）
-    // weak: 本属性的弱点属性列表（伤害×0.8）
-    // resist: 本属性抵抗的属性列表（受到伤害×0.8）
-    // ignore: 本属性无视的属性列表（攻击无效）
-    '普通': { 
-        strong: [],
-        weak: ['格斗'],
-        resist: [],
-        ignore: ['幽灵'] 
-    },
-    '地': {
-        strong: ['岩','毒','格斗','火','电'],
-        weak: ['水','草','冰'],
-        resist: ['岩','毒'],
-        ignore: ['电']
-    },
-    '岩': {
-        strong: ['虫','飞','火'],
-        weak: ['地','钢','格斗','水','草','冰'],
-        resist: ['普通','飞','火'],
-        ignore: []
-    },
-    '钢': {
-        strong: ['岩','虫'],
-        weak: ['格斗','火'],
-        resist: ['普通','岩','钢','虫','幽灵','飞','超能','草','冰','龙','恶'],
-        ignore: ['毒']
-    },
-    '毒': {
-        strong: ['草'],
-        weak: ['地','超能'],
-        resist: ['毒','虫','草'],
-        ignore: []
-    },
-    '虫': {
-        strong: ['超能','草','恶'],
-        weak: ['岩','钢','飞','火'],
-        resist: ['地','虫','草'],
-        ignore: []
-    },
-    '幽灵': {
-        strong: ['幽灵','超能'],
-        weak: ['幽灵','恶'],
-        resist: [],
-        ignore: ['普通','格斗']
-    },
-    '飞': {
-        strong: ['虫','格斗','草'],
-        weak: ['岩','冰','电'],
-        resist: ['格斗','虫','草'],
-        ignore: ['地']
-    },
-    '格斗': {
-        strong: ['普通','岩','钢','冰','恶'],
-        weak: ['地','飞','超能'],
-        resist: ['恶'],
-        ignore: []
-    },
-    '超能': {
-        strong: ['毒','格斗'],
-        weak: ['虫','幽灵','恶'],
-        resist: ['格斗','超能'],
-        ignore: []
-    },
-    '火': {
-        strong: ['钢','虫','草','冰'],
-        weak: ['地','岩','水'],
-        resist: ['钢','火','草','冰'],
-        ignore: []
-    },
-    '水': {
-        strong: ['地','岩','火'],
-        weak: ['草','电'],
-        resist: ['钢','火','冰'],
-        ignore: []
-    },
-    '草': {
-        strong: ['地','岩','水'],
-        weak: ['毒','虫','飞','火','冰'],
-        resist: ['地','水','草','电'],
-        ignore: []
-    },
-    '冰': {
-        strong: ['地','岩','飞','草','龙'],
-        weak: ['格斗','火'],
-        resist: ['钢','冰'],
-        ignore: []
-    },
-    '龙': {
-        strong: ['龙'],
-        weak: ['冰','龙'],
-        resist: ['格斗','火','水','草','电'],
-        ignore: []
-    },
-    '恶': {
-        strong: ['幽灵','超能'],
-        weak: ['虫','格斗'],
-        resist: ['幽灵'],
-        ignore: ['超能']
-    },
-    '电': {
-        strong: ['飞','水'],
-        weak: ['地'],
-        resist: ['钢','飞','电'],
-        ignore: []
-    }
-};
+    <button onclick="castSpell()" id="castButton">发动咒语</button>
 
 
-// 在TYPE_CHART中添加颜色属性
-const TYPE_COLORS = {
-    '普通': '#A8A878',
-    '地': '#E0C068',
-    '岩': '#B8A038',
-    '钢': '#B8B8D0',
-    '毒': '#A040A0',
-    '虫': '#A8B820',
-    '幽灵': '#705898',
-    '飞': '#A890F0',
-    '格斗': '#C03028',
-    '超能': '#F85888',
-    '火': '#F08030',
-    '水': '#6890F0',
-    '草': '#78C850',
-    '冰': '#98D8D8',
-    '龙': '#7038F8',
-    '恶': '#705848',
-    '电': '#F8D030'
-};
 
-Object.keys(TYPE_CHART).forEach(type => {
-    TYPE_CHART[type].color = TYPE_COLORS[type];
-});
+    <div>攻击次数：<span id="attackCount">0</span>击</div>
 
-const CHAR_EFFECTS = {
-// 已有的例子
-'火': { types: [{type:'火', level: 1}], level: 1, cost: 1, tooltip: "火系威力+1级" },
-'炎': { types: [{type:'火', level: 2}], level: 2, cost: 2, tooltip: "火系威力+2级" },
-'焰': { types: [{type:'火', level: 3}], level: 3, cost: 3, tooltip: "火系威力+3级" },
-'水': { types: [{type:'水', level: 1}], level: 1, cost: 1, tooltip: "水系威力+1级" },
-'雷': { types: [{type:'电', level: 1}], level: 1, cost: 2, tooltip: "电系威力+1级" },
-'岩': { types: [{type:'岩', level: 1}], level: 1, cost: 2, tooltip: "岩系威力+1级" },
-'龙': { types: [{type:'龙', level: 1}], level: 1, cost: 3, tooltip: "龙系威力+1级" },
-// 新增的普通系
-'凡': { types: [{type:'普通', level: 1}], level: 1, cost: 1, tooltip: "普通系威力+1级" },
-'常': { types: [{type:'普通', level: 2}], level: 2, cost: 2, tooltip: "普通系威力+2级" },
-'庸': { types: [{type:'普通', level: 3}], level: 3, cost: 3, tooltip: "普通系威力+3级" },
-// 地系
-'地': { types: [{type:'地', level: 1}], level: 1, cost: 1, tooltip: "地系威力+1级" },
-'震': { types: [{type:'地', level: 2}], level: 2, cost: 2, tooltip: "地系威力+2级" },
-'坤': { types: [{type:'地', level: 3}], level: 3, cost: 3, tooltip: "地系威力+3级" },
-// 岩系已存在，补充高级
-'磊': { types: [{type:'岩', level: 2}], level: 2, cost: 3, tooltip: "岩系威力+2级" },
-'磐': { types: [{type:'岩', level: 3}], level: 3, cost: 4, tooltip: "岩系威力+3级" },
-// 钢系
-'钢': { types: [{type:'钢', level: 1}], level: 1, cost: 2, tooltip: "钢系威力+1级" },
-'铁': { types: [{type:'钢', level: 2}], level: 2, cost: 3, tooltip: "钢系威力+2级" },
-'铬': { types: [{type:'钢', level: 3}], level: 3, cost: 4, tooltip: "钢系威力+3级" },
-// 毒系
-'毒': { types: [{type:'毒', level: 1}], level: 1, cost: 1, tooltip: "毒系威力+1级" },
-'瘴': { types: [{type:'毒', level: 2}], level: 2, cost: 2, tooltip: "毒系威力+2级" },
-'蛊': { types: [{type:'毒', level: 3}], level: 3, cost: 3, tooltip: "毒系威力+3级" },
-// 虫系
-'虫': { types: [{type:'虫', level: 1}], level: 1, cost: 1, tooltip: "虫系威力+1级" },
-'蜕': { types: [{type:'虫', level: 2}], level: 2, cost: 2, tooltip: "虫系威力+2级" },
-'蛰': { types: [{type:'虫', level: 3}], level: 3, cost: 3, tooltip: "虫系威力+3级" },
-// 幽灵系
-'幽': { types: [{type:'幽灵', level: 1}], level: 1, cost: 2, tooltip: "幽灵系威力+1级" },
-'冥': { types: [{type:'幽灵', level: 2}], level: 2, cost: 3, tooltip: "幽灵系威力+2级" },
-'魂': { types: [{type:'幽灵', level: 3}], level: 3, cost: 4, tooltip: "幽灵系威力+3级" },
-// 飞行系
-'飞': { types: [{type:'飞', level: 1}], level: 1, cost: 1, tooltip: "飞行系威力+1级" },
-'翔': { types: [{type:'飞', level: 2}], level: 2, cost: 2, tooltip: "飞行系威力+2级" },
-'翱': { types: [{type:'飞', level: 3}], level: 3, cost: 3, tooltip: "飞行系威力+3级" },
-// 格斗系
-'斗': { types: [{type:'格斗', level: 1}], level: 1, cost: 1, tooltip: "格斗系威力+1级" },
-'武': { types: [{type:'格斗', level: 2}], level: 2, cost: 2, tooltip: "格斗系威力+2级" },
-'战': { types: [{type:'格斗', level: 3}], level: 3, cost: 3, tooltip: "格斗系威力+3级" },
-// 超能系
-'念': { types: [{type:'超能', level: 1}], level: 1, cost: 2, tooltip: "超能系威力+1级" },
-'灵': { types: [{type:'超能', level: 2}], level: 2, cost: 3, tooltip: "超能系威力+2级" },
-'神': { types: [{type:'超能', level: 3}], level: 3, cost: 4, tooltip: "超能系威力+3级" },
-// 草系
-'草': { types: [{type:'草', level: 1}], level: 1, cost: 1, tooltip: "草系威力+1级" },
-'蔓': { types: [{type:'草', level: 2}], level: 2, cost: 2, tooltip: "草系威力+2级" },
-'森': { types: [{type:'草', level: 3}], level: 3, cost: 3, tooltip: "草系威力+3级" },
-// 冰系
-'冰': { types: [{type:'冰', level: 1}], level: 1, cost: 2, tooltip: "冰系威力+1级" },
-'霜': { types: [{type:'冰', level: 2}], level: 2, cost: 3, tooltip: "冰系威力+2级" },
-'寒': { types: [{type:'冰', level: 3}], level: 3, cost: 4, tooltip: "冰系威力+3级" },
-// 龙系补充高级
-'煌': { types: [{type:'龙', level: 2}], level: 2, cost: 4, tooltip: "龙系威力+2级" },
-'霸': { types: [{type:'龙', level: 3}], level: 3, cost: 5, tooltip: "龙系威力+3级" },
-// 恶系
-'恶': { types: [{type:'恶', level: 1}], level: 1, cost: 2, tooltip: "恶系威力+1级" },
-'邪': { types: [{type:'恶', level: 2}], level: 2, cost: 3, tooltip: "恶系威力+2级" },
-'暗': { types: [{type:'恶', level: 3}], level: 3, cost: 4, tooltip: "恶系威力+3级" },
-// 电系补充高级
-'霆': { types: [{type:'电', level: 2}], level: 2, cost: 3, tooltip: "电系威力+2级" },
-'霹': { types: [{type:'电', level: 3}], level: 3, cost: 4, tooltip: "电系威力+3级" },
-};
+    <h1 style="margin-top: 50px;">冒险者</h1>
+    <div class="health-bar">
+        <div class="health-fill" id="playerHealth" style="width: 100%; background: linear-gradient(45deg, #00ff00 0%, #00cc00 100%);"></div>
+    </div>
 
 
-// 添加默认类型配置防止未定义错误
-const DEFAULT_TYPE_INFO = {
-    strong: [],
-    weak: [],
-    resist: [],
-    ignore: [],
-    color: '#999'
-};
+    <!-- 咒语确认弹窗 -->
+    <div id="spellDialog">
+        <h2 id="spellName"></h2>
+        <p id="spellPower"></p>
+        <p id="spellDesc"></p>
+        <button onclick="confirmSpell()">发动！</button>
+        <button onclick="cancelSpell()">取消</button>
+    </div>
 
-let gameState = {
-    player: { hp: 1000, energy: 10 },
-    enemy: { hp: 100, type: '普通' },
-    selectedChars: [],
-    score: 0,
-    currentSkills: [] // 新增：当前可用的技能字符
-};
+    <div id="battleLog"></div>
 
-function initGame() {
-    generateEnemy();
-    generateRandomSkills(); // 生成初始技能
-    renderWordButtons();
-    updateAllDisplays();
-}
+    <script>
+        // 配置项（需替换为真实值）
+        const CONFIG = {
+            API_ENDPOINT: 'https://yuanqi.tencent.com/openapi/v1/agent/chat/completions',
+            ASSISTANT_ID: 'TRlr05PZe7n6',
+            BEARER_TOKEN: 'MAN1ugTijvauHvKe3oPmZKXzu7Th2uhA',
+            USER_ID: 'YOUR_USER_ID'
+        };
 
-// 生成随机技能池
-function generateRandomSkills() {
-    const allSkills = Object.keys(CHAR_EFFECTS);
-    // 洗牌算法抽取12个
-    gameState.currentSkills = allSkills
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 12);
-    // 清空已选技能
-    gameState.selectedChars = [];
-}
 
-function generateEnemy() {
-    const types = Object.keys(TYPE_CHART);
-    gameState.enemy = {
-        hp: 100,
-        type: types[Math.floor(Math.random() * types.length)],
-        maxHP: 100
-    };
-}
+        // 添加本地字库配置
+        const LOCAL_WORDS = [
+            "火","水","风","雷","冰","光","暗","龙","斩","杀","破","灭",
+            "炎","爆","咒","盾","御","愈","毒","影","魂","灵","圣","魔",
+            "狂","怒","震","天","地","裂","空","瞬","幻","神","威","吼"
+        ];
 
-function updateAllDisplays() {
-    // 更新玩家状态
-    document.getElementById('player-hp').textContent = gameState.player.hp;
-    document.getElementById('player-hp-bar').style.width = `${(gameState.player.hp / CONFIG.baseHP) * 100}%`;
-    
-    // 更新敌人状态
-    document.getElementById('enemy-hp').textContent = gameState.enemy.hp;
-    document.getElementById('enemy-hp-bar').style.width = `${(gameState.enemy.hp / CONFIG.baseHP) * 100}%`;
+        let gameState = {
+            bossHp: 500,
+            playerHp: 200, // 新增玩家血量
+            attackCount: 0,
+            selectedWords: [],
+            isProcessing: false,
+            isPlayerAlive: true // 新增存活状态
+        };
 
-    
-    const typeTag = document.getElementById('enemy-type');
-    typeTag.style.backgroundColor = TYPE_CHART[gameState.enemy.type]?.color || '#777';
-    typeTag.style.textShadow = '1px 1px 2px rgba(0,0,0,0.3)';
-    typeTag.textContent = gameState.enemy.type;
-
-    // 更新能量点
-    const totalCost = gameState.selectedChars.reduce((sum, c) => sum + CHAR_EFFECTS[c].cost, 0);
-    const energyContainer = document.getElementById('player-energy');
-    energyContainer.innerHTML = Array(CONFIG.maxEnergy).fill().map((_, i) => 
-        `<div class="energy-point ${i < gameState.player.energy ? 'active' : ''} ${i >= (gameState.player.energy - totalCost) ? 'over' : ''}"></div>`
-    ).join('');
-
-    // 更新得分
-    document.getElementById('score').textContent = gameState.score;
-
-    const attackBtn = document.getElementById('attack-btn');
-    attackBtn.disabled = false
-
-}
-
-function renderWordButtons() {
-   const container = document.getElementById('word-buttons');
-    const totalCost = gameState.selectedChars.reduce((sum, c) => sum + CHAR_EFFECTS[c].cost, 0);
-    
-    container.innerHTML = gameState.currentSkills.map(char => {
-        const isSelected = gameState.selectedChars.includes(char);
-        const canSelect = (totalCost + CHAR_EFFECTS[char].cost) <= gameState.player.energy;
-        
-        return `
-            <button class="char-btn ${isSelected ? 'selected' : ''}"
-                data-tooltip="${CHAR_EFFECTS[char].tooltip}"
-                onclick="toggleChar('${char}')"
-                ${isSelected || canSelect ? '' : 'disabled'}>
-                ${char}（${CHAR_EFFECTS[char].cost}）
-            </button>
-        `;
-    }).join('');
-}
-
-function toggleChar(char) {
-    const index = gameState.selectedChars.indexOf(char);
-    if (index > -1) {
-        gameState.selectedChars.splice(index, 1);
-    } else {
-        const newCost = gameState.selectedChars.reduce((sum, c) => sum + CHAR_EFFECTS[c].cost, 0) + CHAR_EFFECTS[char].cost;
-        if (newCost > CONFIG.maxEnergy) {
-            alert("能量不足！");
-            return;
-        }
-        gameState.selectedChars.push(char);
-    }
-    renderWordButtons();
-    updateAllDisplays();
-}
-
-function executeSkill() {
-    const skillName = gameState.selectedChars.join('');
-    const result = calculateDamage();
-    
-
-    // 记录日志
-    let logMessage = `使用 ${skillName} 造成 ${result.damage} 伤害`;
-    if (result.effect) {
-        logMessage += ` ${result.effect}`;
-    }
-    log(logMessage);
-    
-    // 更新敌人HP
-    gameState.enemy.hp = Math.max(0, gameState.enemy.hp - result.damage);
-    
-    // 检查是否击败敌人
-    if (gameState.enemy.hp <= 0) {
-        gameState.score++;
-        log("🎉 击败敌人！获得1分");
-        generateEnemy();
-        gameState.player.energy = CONFIG.maxEnergy;
-    }
-    
-    const playerElem = document.getElementById('player-unit');
-    playerElem.classList.add('attack-animation');
-    setTimeout(() => {
-        playerElem.classList.remove('attack-animation');
-        updateAllDisplays(); 
-    }, 500);
-
-    setTimeout(() => {
-        enemyAttack();
-        generateRandomSkills();
-    }, 1000);
-    
-}
-
-function calculateDamage() {
-    let totalDamage = 0;
-    const effects = new Set();
-    const typeLevels = {}; // 修复：初始化类型等级容器
-
-    // 第一步：收集所有技能类型等级
-    gameState.selectedChars.forEach(char => {
-        const effect = CHAR_EFFECTS[char];
-        effect.types.forEach(({ type, level }) => {
-            if (!typeLevels[type]) typeLevels[type] = [];
+        // 元素验证
+        function validateElements() {
+            const requiredElements = [
+                'spellName', 'spellPower', 'spellDesc',
+                'attackCount', 'bossHealth', 'castButton',
+                'wordsContainer', 'battleLog', 'boss'
+            ];
             
-            // 插入并排序，保留最高两个等级
-            typeLevels[type].push(level);
-            typeLevels[type].sort((a, b) => b - a);
-            if (typeLevels[type].length > 2) {
-                typeLevels[type].pop(); // 移除最低等级
-            }
-        });
-    });
-
-    // 第二步：计算每个类型的伤害
-    Object.entries(typeLevels).forEach(([type, levels]) => {
-        const totalLevel = levels.reduce((a, b) => a + b, 0);
-        let damage = totalLevel * 10;
-        const multiplier = calculateMultiplier(type, gameState.enemy.type);
-
-        // 记录效果类型
-        if (multiplier === 0) {
-            effects.add('immune');
-        } else if (multiplier > 1) {
-            effects.add('super');
-        } else if (multiplier < 1) {
-            effects.add('not_very');
+            requiredElements.forEach(id => {
+                if (!document.getElementById(id)) {
+                    throw new Error(`关键元素 #${id} 加载失败`);
+                }
+            });
         }
 
-        totalDamage += Math.floor(damage * multiplier);
-    });
+        class TencentAPI {
+            static async callAgent(command) {
+                try {
+                    const response = await fetch(CONFIG.API_ENDPOINT, {
+                        method: 'POST',
+                        headers: {
+                            'X-Source': 'openapi',
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${CONFIG.BEARER_TOKEN}`
+                        },
+                        body: JSON.stringify({
+                            assistant_id: CONFIG.ASSISTANT_ID,
+                            user_id: CONFIG.USER_ID,
+                            stream: false,
+                            messages: [{
+                                role: "user",
+                                content: [{ type: "text", text: command }]
+                            }]
+                        })
+                    });
 
-    // 确定最终提示
-    let effectText = '';
-    if (effects.has('immune')) {
-        effectText = '效果无效';
-    } else if (effects.has('super')) {
-        effectText = '十分有效！';
-    } else if (effects.has('not_very')) {
-        effectText = '效果微弱';
-    }
-    
-    return { damage: totalDamage, effect: effectText };
-}
-
-
-function calculateMultiplier(attackType, defendType) {
- // 防御性检查
-    const attackInfo = TYPE_CHART[attackType] || DEFAULT_TYPE_INFO;
-    const defendInfo = TYPE_CHART[defendType] || DEFAULT_TYPE_INFO;
-
-    // 处理无视规则（安全访问属性）
-    const attackIgnore = attackInfo.ignore || [];
-    const defendIgnore = defendInfo.ignore || [];
-    if (attackIgnore.includes(defendType) || defendIgnore.includes(attackType)) {
-        return 0;
-    }
-
-    let multiplier = 1;
-
-    // 处理克制关系（安全访问数组）
-    const attackStrong = attackInfo.strong || [];
-    const defendWeak = defendInfo.weak || [];
-    if (attackStrong.includes(defendType) || defendWeak.includes(attackType)) {
-        multiplier *= 1.5;
-    }
-
-    // 处理抵抗关系（安全访问数组）
-    const attackWeak = attackInfo.weak || [];
-    const defendResist = defendInfo.resist || [];
-    if (attackWeak.includes(defendType) || defendResist.includes(attackType)) {
-        multiplier *= 0.8;
-    }
-
-    return multiplier;
-}
-
-function enemyAttack() {
-
-    const playerElem = document.getElementById('enemy-unit');
-    playerElem.classList.add('attack-animation');
-    setTimeout(() => {
-        playerElem.classList.remove('attack-animation');
-        const damage = 15 + Math.floor(Math.random() * 10);
-        gameState.player.hp = Math.max(0, gameState.player.hp - damage);
-        log(`💥 敌人攻击造成 ${damage} 伤害`);
-        
-        gameState.selectedChars = [];
-        renderWordButtons();
-        updateAllDisplays(); 
-    }, 500);    
-}
-
-function log(message) {
-    const logElement = document.getElementById('battle-log');
-    const coloredMessage = applyColorTags(message);
-    logElement.innerHTML += `<div>🕒 ${new Date().toLocaleTimeString()} - ${coloredMessage}</div>`;
-    logElement.scrollTop = logElement.scrollHeight;
-}
-
-function applyColorTags(text) {
-    const charMap = Object.keys(CHAR_EFFECTS).reduce((acc, char) => {
-        const type = CHAR_EFFECTS[char].types[0]; // 取第一个类型
-        acc[char] = TYPE_CHART[type]?.color || '#666';
-        return acc;
-    }, {});
-    
-    return text.split('').map(char => {
-        const color = charMap[char] || '#666';
-        return `<span style="color:${color};font-weight:bold">${char}</span>`;
-    }).join('');
-}
-
-// 启动游戏
-initGame();
-
-// 增强CHAR_EFFECTS配置验证
-function validateConfig() {
-    Object.entries(CHAR_EFFECTS).forEach(([char, config]) => {
-        config.types.forEach(typeObj => {
-            if (!TYPE_CHART[typeObj.type]) {
-                console.error(`配置错误：字符"${char}"使用了未定义的类型"${typeObj.type}"`);
+                    if (!response.ok) throw new Error(`API错误: ${response.status}`);
+                    const data = await response.json();
+                    return this.parseResponse(data);
+                } catch (error) {
+                    console.error('API调用失败:', error);
+                    throw error;
+                }
             }
-        });
-    });
-}
 
-// 初始化时执行配置验证
-validateConfig();
-</script>
+            static parseResponse(data) {
+                try {
+                    const content = data.choices[0].message.content;
+                    const jsonString = content.match(/```json\n([\s\S]*?)\n```/)?.[1] || content;
+                    return JSON.parse(jsonString);
+                } catch (e) {
+                    throw new Error('响应解析失败');
+                }
+            }
+        }
+
+        class GameController {
+            static async initialize() {
+                validateElements();
+                await this.generateNewWords();
+            }
+
+            static async generateNewWords() {
+                toggleProcessing(true);
+                try {
+                    // 从本地字库随机选取12个不重复的文字
+                    const words = [];
+                    const tempWords = [...LOCAL_WORDS];
+                    while(words.length < 12 && tempWords.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * tempWords.length);
+                        words.push(tempWords.splice(randomIndex, 1)[0]);
+                    }
+                    renderWords(words);
+                } catch (error) {
+                    showError('生成文字失败: ' + error.message);
+                } finally {
+                    toggleProcessing(false);
+                }
+            }
+
+            static async evaluateSpell() {
+                const spellName = gameState.selectedWords.join('');
+                const result = await TencentAPI.callAgent(`威力评估：${spellName}`);
+                
+                if (!result.power || !result.desc || !result.words) {
+                    throw new Error('无效的API响应');
+                }
+                
+                return {
+                    power: Math.min(999, result.power),
+                    desc: result.desc,
+                    words: result.words + spellName + '!!!'
+                };
+            }
+        }
+
+        // UI交互函数
+        function toggleWord(word, element) {
+            if (gameState.isProcessing) return;
+            
+            const index = gameState.selectedWords.indexOf(word);
+            if (index === -1) {
+                gameState.selectedWords.push(word);
+                element.classList.add('selected');
+            } else {
+                gameState.selectedWords.splice(index, 1);
+                element.classList.remove('selected');
+            }
+        }
+
+        async function castSpell() {
+            if (gameState.isProcessing || gameState.selectedWords.length === 0) return;
+    
+            try {
+                gameState.isProcessing = true;
+                showLoading(true); // 显示加载状态
+                
+                const { power, desc, words } = await GameController.evaluateSpell();
+
+                showLoading(false);
+                // 显示弹窗
+                showSpellDialog(power, desc, gameState.selectedWords.join(''));
+
+                // 等待用户确认
+                const confirmed = await new Promise(resolve => {
+                    window.confirmSpell = () => resolve(true);
+                    window.cancelSpell = () => resolve(false);
+                });
+
+                document.getElementById('spellDialog').style.display = 'none';
+                if (!confirmed) return;
+
+                // 执行攻击
+                executeAttack(power, words);
+            } catch (error) {
+                showError('咒语发动失败: ' + error.message);
+            } finally {
+                showLoading(false); // 隐藏加载状态
+                gameState.isProcessing = false;
+            }
+        }
+
+        // 新增加载状态控制函数
+        function showLoading(show) {
+            const loader = document.getElementById('loadingOverlay');
+            loader.style.display = show ? 'flex' : 'none';
+            document.getElementById('castButton').disabled = show;
+        }
+
+        function showSpellDialog(power, desc, spellName) {
+            const dialog = document.getElementById('spellDialog');
+            if (!dialog) throw new Error('弹窗组件未找到');
+
+            dialog.querySelector('#spellName').textContent = spellName;
+            dialog.querySelector('#spellPower').textContent = `威力: ${power}`;
+            dialog.querySelector('#spellDesc').textContent = desc;
+            dialog.style.display = 'block';
+        }
+
+        function executeAttack(power, words) {
+            // 显示攻击动画
+            // 创建动画容器
+            const animContainer = document.createElement('div');
+            animContainer.className = 'spell-animation';
+            
+            // 分割咒语文本
+            const parts = words.split(/([，。！])/).filter(p => p);
+            let currentIndex = 0;
+            
+            // 分段显示
+            const showNextPart = () => {
+                if (currentIndex >= parts.length - 1) {
+                    // 移除分段动画
+                    animContainer.remove();
+                    // 创建最终技能名爆点
+                    const finalElement = document.createElement('div');
+                    finalElement.className = 'final-bang';
+                    finalElement.textContent = parts[currentIndex];
+                    
+                    document.body.appendChild(finalElement);
+                    setTimeout(() => {
+                        // 添加震动效果到BOSS
+                        const boss = document.getElementById('boss');
+                        boss.classList.add('shake');
+                        setTimeout(() => boss.classList.remove('shake'), 800);
+                        finalElement.remove()   
+                         // 更新状态
+                        gameState.attackCount++;
+                        gameState.bossHp = Math.max(0, gameState.bossHp - power);
+                        
+                        // 更新UI
+                        document.getElementById('attackCount').textContent = gameState.attackCount;
+                        document.getElementById('bossHealth').style.width = `${(gameState.bossHp / 1000) * 100}%`;
+
+                        // 战斗日志
+                        logAction(`✨ 发动咒语：${words}（造成${power}点伤害）`);
+
+                        // 胜利判断
+                        if (gameState.bossHp === 0) 
+                        {
+                            setTimeout(() => alert(`胜利！${gameState.attackCount}次攻击击败恶龙！`), 500);
+                        }
+                        else
+                        {
+                             // Boss反击
+                            if (gameState.bossHp > 0) {
+                                setTimeout(bossCounterAttack, 1000);
+                            }
+
+                            // 刷新文字
+                            GameController.generateNewWords();
+                        }                        
+                    }, 1200);
+                    return;
+                }
+
+                // 创建文字片段
+                const partSpan = document.createElement('span');
+                partSpan.className = 'spell-part';
+                partSpan.textContent = parts[currentIndex];
+                animContainer.appendChild(partSpan);
+                
+                // 设置间隔时间
+                const isPunctuation = /[，。！]/.test(parts[currentIndex]);
+                const delay = isPunctuation ? 600 : 300; // 标点停顿更久
+                
+                currentIndex++;
+                setTimeout(showNextPart, delay);
+            };
+
+            // 启动动画
+            document.body.appendChild(animContainer);
+            showNextPart();           
+        }
+
+        function bossCounterAttack() {
+            // 生成20-50随机伤害
+            const damage = Math.floor(Math.random() * 30) + 20;
+            gameState.playerHp = Math.max(0, gameState.playerHp - damage);
+            
+            // 更新血条
+            document.getElementById('playerHealth').style.width = 
+                `${(gameState.playerHp / 200) * 100}%`;
+            
+            // 增加受击效果
+            document.getElementById('playerHealth').classList.add('player-damage');
+            setTimeout(() => {
+                document.getElementById('playerHealth').classList.remove('player-damage');
+            }, 600);
+            
+            // 死亡判定
+            if(gameState.playerHp <= 0 && gameState.isPlayerAlive) {
+                gameState.isPlayerAlive = false;
+                setTimeout(() => {
+                    alert('战斗失败！你被恶龙击败了！');
+                    location.reload(); // 重新开始游戏
+                }, 500);
+            }
+            
+            logAction(`🐉 恶龙反击！你受到${damage}点伤害（剩余生命：${gameState.playerHp}）`);
+        }
+
+        function renderWords(words) {
+            const container = document.getElementById('wordsContainer');
+            container.innerHTML = words.map(word => `
+                <div class="word" onclick="toggleWord('${word}', this)">
+                    ${word}
+                </div>
+            `).join('');
+            gameState.selectedWords = [];
+        }
+
+        function logAction(text) {
+            const log = document.getElementById('battleLog');
+            const entry = document.createElement('div');
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function toggleProcessing(isProcessing) {
+            document.getElementById('castButton').disabled = isProcessing;
+        }
+
+        function showError(message) {
+            logAction(`❌ 错误：${message}`);
+        }
+
+        // 初始化游戏
+        window.onload = () => {
+            try {
+                validateElements();
+                GameController.initialize();
+            } catch (error) {
+                alert('游戏初始化失败: ' + error.message);
+            }
+        }
+    </script>
 </body>
 </html>

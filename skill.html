@@ -42,7 +42,7 @@
         }
 
         #bossHealth {
-            background: linear-gradient(45deg, #ff0000 0%, #ff6a00 100%) !important;
+            background: linear-gradient(45deg, #610404 0%, #ff6a00 100%) !important;
             box-shadow: 0 0 10px #ff0000;
         }
 
@@ -89,7 +89,7 @@
             color: #ffffff;
             padding: 10px;
             overflow-y: auto;
-            border: 2px solid #00ff00;
+            border: 2px solid #011b01;
             border-radius: 8px;
         }
 
@@ -208,7 +208,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 4em;
-    color: #ff0000;
+    color: #a90707;
     animation: finalBang 1.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     z-index: 999;
@@ -283,7 +283,7 @@
 }
 
 #playerHealth {
-    background: linear-gradient(45deg, #00ff00 0%, #00cc00 100%) !important;
+    background: linear-gradient(45deg, #038503 0%, #038503 100%) !important;
     box-shadow: 0 0 10px #00ff00;
 }
 /* 添加飘动动画 */
@@ -322,7 +322,7 @@
 </style>
 </head>
 <body>
-    <h1>恶龙血量</h1>
+    <h1>恶龙</h1>
     <div id="bossContainer">
         <div class="health-bar">
             <div class="health-fill" id="bossHealth" style="width: 100%"></div>
@@ -343,7 +343,7 @@
 
     <div>攻击次数：<span id="attackCount">0</span>击</div>
 
-    <h1 style="margin-top: 50px;">冒险者血量</h1>
+    <h1 style="margin-top: 50px;">冒险者</h1>
     <div class="health-bar">
         <div class="health-fill" id="playerHealth" style="width: 100%; background: linear-gradient(45deg, #00ff00 0%, #00cc00 100%);"></div>
     </div>
@@ -378,7 +378,7 @@
         ];
 
         let gameState = {
-            bossHp: 1000,
+            bossHp: 500,
             playerHp: 200, // 新增玩家血量
             attackCount: 0,
             selectedWords: [],

@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>咒语屠龙战-完整修复版</title>
+    <title>越中二越强</title>
     <style>
         body {
             background: #1a1a1a;
             color: white;
             font-family: Arial, sans-serif;
             text-align: center;
-            padding: 20px;
+            padding: 10px; /* 减少内边距 */
+            margin: 0;
         }
 
         #bossContainer {
@@ -17,7 +18,7 @@
 
         #boss {
             font-size: 5em;
-            margin: 100px 0;
+            margin: 100px 400px;
             transform: scale(3);
             transition: all 0.3s;
         }
@@ -47,7 +48,9 @@
         }
 
         .word {
-            display: inline-block;
+            display: inline-flex; /* 改为弹性布局更好居中 */
+            align-items: center;
+            justify-content: center;
             padding: 24px;
             margin: 10px;
             border: 2px solid #4a5568;
@@ -55,7 +58,10 @@
             cursor: pointer;
             background: #2d3748;
             color: white;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            min-width: 60px;  /* 新增最小尺寸 */
+            min-height: 60px;
+            touch-action: manipulation; /* 禁用双指缩放 */
         }
 
         .selected {
@@ -80,7 +86,7 @@
         }
 
         #battleLog {
-            position: fixed;
+            position: absolute;
             bottom: 20px;
             left: 20px;
             right: 20px;
@@ -91,18 +97,6 @@
             overflow-y: auto;
             border: 2px solid #011b01;
             border-radius: 8px;
-        }
-
-        .spell-animation {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2em;
-            color: #ffeb3b;
-            text-shadow: 0 0 10px #ff5722;
-            animation: spellEffect 6s forwards;
-            pointer-events: none;
         }
 
         @keyframes spellEffect {
@@ -121,7 +115,12 @@
             border-radius: 6px;
             cursor: pointer;
             margin: 5px;
-            transition: opacity 0.3s;
+            transition: 
+                opacity 0.3s,
+                transform 0.2s; /* 新增缩放效果 */
+            min-width: 100px;
+            min-height: 40px;
+            touch-action: manipulation;
         }
 
         button:disabled {
@@ -133,18 +132,18 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 2.5em;
-            color: #ffeb3b;
+            font-size: 6em;
+            color: #f0a849;
             text-shadow: 0 0 10px #ff5722;
             text-align: center;
-            white-space: nowrap;
+            white-space: normal;
         }
 
         .spell-part {
-            display: inline-block;
+            display: block;
             opacity: 0;
             transform: translateY(20px);
-            animation: partAppear 0.3s ease-out forwards;
+            animation: partAppear 0.8s ease-out forwards;
         }
 
         @keyframes partAppear {
@@ -232,15 +231,6 @@
 .shake {
     animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
 }
-/* 新增段落容器样式 */
-.spell-animation {
-    position: fixed;
-    top: 30%; /* 上移给后续段落留空间 */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    text-align: center;
-}
 
 .spell-paragraph {
     position: absolute;
@@ -319,6 +309,85 @@
     animation: floatUp 6s linear forwards;
     white-space: nowrap;
 }
+/* 移动端适配 */
+@media (max-width: 768px) {
+            #boss {
+                font-size: 3em !important; /* 缩小龙图标 */
+                margin: 50px 0 !important;
+                transform: scale(1.5) !important;
+            }
+
+            .health-bar {
+                width: 90% !important; /* 宽度适配屏幕 */
+                height: 20px !important;
+                margin: 10px auto !important;
+            }
+
+            .word {
+                padding: 12px !important;
+                margin: 5px !important;
+                font-size: 0.9em;
+                min-width: 50px;  /* 调小最小尺寸 */
+                min-height: 50px;
+            }
+
+            #spellDialog {
+                width: 90% !important; /* 弹窗宽度适配 */
+                padding: 10px !important;
+            }
+
+            #battleLog {
+                bottom: 10px !important;
+                left: 5px !important;
+                right: 5px !important;
+                height: 100px !important; /* 缩小战斗日志 */
+                font-size: 0.8em;
+            }
+
+            button {
+                padding: 10px 20px !important;
+                font-size: 1em !important;
+                margin: 3px !important;
+                min-width: 80px;
+            }
+
+            h1 {
+                font-size: 1.5em !important; /* 缩小标题 */
+                margin: 10px 0 !important;
+            }
+
+            #attackCount {
+                display: block; /* 单独成行 */
+                margin: 10px 0;
+            }
+
+            /* 调整布局结构 */
+            #bossContainer {
+                margin: 10px auto 30px !important;
+            }
+
+            /* 咒语浮动文字适配 */
+            .spell-float-item {
+                font-size: 1.2em !important;
+            }
+        }
+
+        /* 移动端横屏适配 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            body {
+                font-size: 14px;
+            }
+            
+            #boss {
+                font-size: 2em !important;
+                margin: 20px 0 !important;
+            }
+            
+            #wordsContainer {
+                max-height: 30vh;
+                overflow-y: auto;
+            }
+        }
 </style>
 </head>
 <body>
@@ -372,10 +441,35 @@
 
         // 添加本地字库配置
         const LOCAL_WORDS = [
-            "火","水","风","雷","冰","光","暗","龙","斩","杀","破","灭",
-            "炎","爆","咒","盾","御","愈","毒","影","魂","灵","圣","魔",
-            "狂","怒","震","天","地","裂","空","瞬","幻","神","威","吼"
+           "元","素","暴","风","类","灭","世","龙","炎","破","冰","霜","永","恒","葬",
+           "雷","霆","万","钧","陨","星","崩","天","坠","炽","阳","焚","界","波","深",
+           "渊","寒","狱","息","真","空","次","斩","熔","核","爆","裂","掌","极","光",
+           "幻","闪","冥","府","黑","啸","兵","器","化","血","月","魔","镰","舞","千",
+           "刃","修","罗","雨","圣","裁","决","剑","暗","影","噬","魂","爪","辉","弓",
+           "业","火","双","劫","晶","枪","零","时","戟","断","流","鳞","盾","反","毒",
+           "蔷","薇","之","吻","概","念","具","象","因","果","律","坏","量","子","纠",
+           "缠","锁","无","限","回","廊","阵","维","度","折","叠","击","熵","增","终","焉","咒","率","正","拳","记","忆","重","构","混","沌","观","测","者",
+           "悖","论","螺","旋","炮","存","在","抹","消","术","神","话","诸","黄","昏","巴","别","塔","镇","曲","伊","甸","禁","湿","婆","奥","西","里","斯",
+           "秤","刑","盖","亚","怒","芬","布","尔","冬","泉","比","良","坂","须","佐","能","乎","改","瓦","哈","拉","冲","复","合","词","三","式","四","封",
+           "绝","结","五","感","剥","夺","领","域","六","道","轮","踢","七","杀","八","岐","大","蛇","咬","九","尾","狐","玉","乱","十","方","俱","百","鬼",
+           "夜","行","抄","抽","意","境","心","景","现","线","收","束","灵","共","鸣","震","否","定","宣","言","武","装","展","开","命","运","理","门","投",
+           "阿","赖","耶","识","觉","醒","模","污","染","相","位","转","移","突","刺","拟","声","强","轰","地","切","割","超","电","磁","尖","力","挤","压",
+           "辰","连","打","对","过","载","死","兆","长","名","不","的","挽","歌","程","逆","审","判","海","鲸","吞","创","吐","外","像","间","隙","瞳","第",
+           "以","太","解","放","生","树","向","卡","夏","录","篡","幽","忌","义","津","沼","秘","法","潘","多","盒","邪","眼","莱","凝","视","盟","该","隐",
+           "印","路","羽","那","手","克","苏","鲁","召","唤","尼","德","霍","格","牙","犹","索","托","特","殊","编","号","钳","级","型","坍","缩","偏","射",
+           "洗","礼","动","精","防","御","可","性",
+            "."
         ];
+
+        const LOCAL_END_WORDS = [
+            "暴", "爆", "星", "杀", "斩", "裂", "拳", "弹", "功", "咒", "龙", "剑", "式", "月", "光", "决"
+        ]
+
+
+        const GAME_CONFIG = {
+            PLAYER_HP_MAX: 200,
+            BOSS_HP_MAX: 500
+        };
 
         let gameState = {
             bossHp: 500,
@@ -454,10 +548,12 @@
                     // 从本地字库随机选取12个不重复的文字
                     const words = [];
                     const tempWords = [...LOCAL_WORDS];
-                    while(words.length < 12 && tempWords.length > 0) {
+                    while(words.length < 11 && tempWords.length > 0) {
                         const randomIndex = Math.floor(Math.random() * tempWords.length);
                         words.push(tempWords.splice(randomIndex, 1)[0]);
                     }
+                    const randomIndex = Math.floor(Math.random() * LOCAL_END_WORDS.length);
+                    words.push(LOCAL_END_WORDS[randomIndex]);
                     renderWords(words);
                 } catch (error) {
                     showError('生成文字失败: ' + error.message);
@@ -477,7 +573,7 @@
                 return {
                     power: Math.min(999, result.power),
                     desc: result.desc,
-                    words: result.words + spellName + '!!!'
+                    words: result.words + spellName + '！！！'
                 };
             }
         }
@@ -552,7 +648,7 @@
             animContainer.className = 'spell-animation';
             
             // 分割咒语文本
-            const parts = words.split(/([，。！])/).filter(p => p);
+            const parts = words.match(/[^，。！]+[，。！]+/g);
             let currentIndex = 0;
             
             // 分段显示
@@ -578,7 +674,7 @@
                         
                         // 更新UI
                         document.getElementById('attackCount').textContent = gameState.attackCount;
-                        document.getElementById('bossHealth').style.width = `${(gameState.bossHp / 1000) * 100}%`;
+                        document.getElementById('bossHealth').style.width = `${(gameState.bossHp / GAME_CONFIG.BOSS_HP_MAX) * 100}%`;
 
                         // 战斗日志
                         logAction(`✨ 发动咒语：${words}（造成${power}点伤害）`);
@@ -606,11 +702,14 @@
                 const partSpan = document.createElement('span');
                 partSpan.className = 'spell-part';
                 partSpan.textContent = parts[currentIndex];
+                if (animContainer.children.length > 0) {
+                    animContainer.removeChild(animContainer.children[0]);
+                }
                 animContainer.appendChild(partSpan);
                 
                 // 设置间隔时间
-                const isPunctuation = /[，。！]/.test(parts[currentIndex]);
-                const delay = isPunctuation ? 600 : 300; // 标点停顿更久
+                const strL = parts[currentIndex].length;
+                const delay = strL * 175; // 标点停顿更久
                 
                 currentIndex++;
                 setTimeout(showNextPart, delay);
@@ -628,7 +727,7 @@
             
             // 更新血条
             document.getElementById('playerHealth').style.width = 
-                `${(gameState.playerHp / 200) * 100}%`;
+                `${(gameState.playerHp / GAME_CONFIG.PLAYER_HP_MAX) * 100}%`;
             
             // 增加受击效果
             document.getElementById('playerHealth').classList.add('player-damage');
